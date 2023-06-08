@@ -1,11 +1,46 @@
 import java.net.*;
 import java.io.*;
+import java.math.BigInteger;
 import java.util.regex.*;
 
 public class PacketSender {
 
-    static String encodePayload() {
+    /**
+     * Converts the data from string text to hexadecimal
+     * 
+     * @return the payload in hexadecimal
+     */
+    static String encodePayload(String text) throws UnsupportedEncodingException {
+        return String.format("%040x", new BigInteger(1, text.getBytes()));
+    }
 
+    /**
+     * Encapculates the data into an IP datagram (IP packet) and initialize the
+     * modular sum (checksum) to 0000
+     * 
+     * @return encapsulated data
+     */
+    static String encapsulatePayload(String byteData) {
+        // [FIX] All fields marked with FIX (fixed) is to be hard-coded
+        // [VAR] All fields marked with VAR (variable) is to be variable data
+        // NOTE: "Octet" means "byte"
+
+        String[] octets = new String[7];
+        octets[0] = "4500"; // [FIX] 4 == IPv4 + 5 == header length + 00 == service type
+        octets[1] = ""; // [VAR] total header length (header length + payload length)
+        octets[2] = "1c46"; // [FIX] identification
+        octets[3] = "4000"; // [FIX] flags + fragment offset
+        octets[4] = "4006"; // [FIX] 40 == TTL + 06 == TCP protocol
+        octets[5] = "0000"; // [VAR] source header checksum (initialized to 0000)
+        octets[6] = ""; // [VAR] IP address source + IP address destination
+
+        String encapsulatedPayload = "";
+        for (String octet : octets) {
+            encapsulatedPayload += octet;
+        }
+        encapsulatedPayload += byteData;
+
+        return encapsulatedPayload;
     }
 
     /**
@@ -43,21 +78,24 @@ public class PacketSender {
         String payload = args[1];
 
         // try to connect to server / packet receiver
-        Socket client = new Socket(receiverIP, 8888);
+        // Socket client = new Socket(receiverIP, 8888);
         // if server is not listening - You will get Exception
         // java.net.ConnectException: Connection refused: connect
 
         // encode the payload
+        System.out.println(receiverIP + " " + payload);
+        System.out.println(encodePayload(payload));
+        System.out.println(encapsulatePayload(encodePayload(payload)));
 
-        // write to server using output stream
-        DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        out.writeUTF("Hello server - How are you sent by Client");
+        // // write to server using output stream
+        // DataOutputStream out = new DataOutputStream(client.getOutputStream());
+        // out.writeUTF("Hello server - How are you sent by Client");
 
-        // read from the server
-        DataInputStream in = new DataInputStream(client.getInputStream());
-        System.out.println("Data received from the server is -> " + in.readUTF());
+        // // read from the server
+        // DataInputStream in = new DataInputStream(client.getInputStream());
+        // System.out.println("Data received from the server is -> " + in.readUTF());
 
-        // close the connection
-        client.close();
+        // // close the connection
+        // client.close();
     }
 }
