@@ -94,8 +94,6 @@ public class PacketSender {
         Matcher matcher = pattern.matcher(args[0]);
         boolean isIPv4 = matcher.matches();
 
-        System.out.println(args[0] + " --- " + args[1]);
-
         return args.length == 2 && isIPv4 && args[1] != null;
     }
 
