@@ -6,9 +6,33 @@ import java.util.regex.*;
 public class PacketSender {
 
     /**
+     * Converts a regular string IPv4 address to a hexadecimal string IPv4 address
+     * 
+     * @param ipAddress
+     * @return string of hexadecimal IPv4 address
+     */
+    static String convertIPv4StringToHexadecimal(String ipAddress) {
+        String hexadecimalIpv4Address = "";
+        String[] ipOctects = ipAddress.split("\\.");
+
+        // traverse through each of the 4 octets and convert them to hexadecimal
+        for (int i = 0; i < 4; i++) {
+            int currOctet = Integer.parseInt(ipOctects[i]); // current octect (byte) in int
+
+            // convert decimal to hexadecimal; add leading zeros to the octet if needed
+            hexadecimalIpv4Address += String.format("%02X", currOctet);
+            // https://stackoverflow.com/questions/8689526/integer-to-two-digits-hex-in-java
+        }
+
+        return hexadecimalIpv4Address;
+    }
+
+    /**
      * Converts the data from string text to hexadecimal
      * 
+     * @param text
      * @return the payload in hexadecimal
+     * @throws UnsupportedEncodingException
      */
     static String encodePayload(String text) throws UnsupportedEncodingException {
         return String.format("%040x", new BigInteger(1, text.getBytes()));
@@ -18,6 +42,7 @@ public class PacketSender {
      * Encapculates the data into an IP datagram (IP packet) and initialize the
      * modular sum (checksum) to 0000
      * 
+     * @param byteData
      * @return encapsulated data
      */
     static String encapsulatePayload(String byteData) {
@@ -25,20 +50,32 @@ public class PacketSender {
         // [VAR] All fields marked with VAR (variable) is to be variable data
         // NOTE: "Octet" means "byte"
 
-        String[] octets = new String[7];
+        String[] octets = new String[8];
         octets[0] = "4500"; // [FIX] 4 == IPv4 + 5 == header length + 00 == service type
-        octets[1] = ""; // [VAR] total header length (header length + payload length)
+        octets[1] = "0000"; // [VAR] header length (header length + payload length) (initialized to 0000)
         octets[2] = "1c46"; // [FIX] identification
         octets[3] = "4000"; // [FIX] flags + fragment offset
         octets[4] = "4006"; // [FIX] 40 == TTL + 06 == TCP protocol
         octets[5] = "0000"; // [VAR] source header checksum (initialized to 0000)
-        octets[6] = ""; // [VAR] IP address source + IP address destination
+        octets[6] = convertIPv4StringToHexadecimal("192.168.0.3")
+                + convertIPv4StringToHexadecimal("192.168.0.1"); // [VAR] IP address source + IP address destination
+        octets[7] = byteData;
 
         String encapsulatedPayload = "";
+
         for (String octet : octets) {
             encapsulatedPayload += octet;
         }
-        encapsulatedPayload += byteData;
+
+        // calculate header length then place the value in the header length field
+        // TODO: This logic may be wrong. Review how to calculate header length
+        octets[1] = String.format("%04X", encapsulatedPayload.length() / 2);
+
+        encapsulatedPayload = "";
+
+        for (String octet : octets) {
+            encapsulatedPayload += octet;
+        }
 
         return encapsulatedPayload;
     }
@@ -62,6 +99,21 @@ public class PacketSender {
         return args.length == 2 && isIPv4 && args[1] != null;
     }
 
+    /**
+     * Sends a user-inputted message to a specified IP address
+     * Takes two arguments as input: <IPv4_ADDRESS> and <MESSAGE_STRING>
+     * 
+     * Example:
+     * java PacketSender.java 127.0.0.1 "Colombia 1 - Messi 0"
+     * 
+     * NOTE: Due to the complicated nature of getting the local host's IP address
+     * and the various network interface cards, we will assume that both the
+     * PacketSender's and PacketReceiver's IP addresses will be 127.0.0.1
+     * https://stackoverflow.com/questions/9481865/getting-the-ip-address-of-the-current-machine-using-java
+     * 
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
 
         // verify that command line arguments are inputted correctly
@@ -84,7 +136,7 @@ public class PacketSender {
 
         // encode the payload
         System.out.println(receiverIP + " " + payload);
-        System.out.println(encodePayload(payload));
+        // System.out.println(encodePayload(payload));
         System.out.println(encapsulatePayload(encodePayload(payload)));
 
         // // write to server using output stream
