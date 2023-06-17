@@ -28,7 +28,7 @@ public class PacketSender {
     }
 
     /**
-     * Converts a string of 2-byte packet fields into a singular long packet string
+     * Converts a string array of 2-byte packet fields into a singular packet string
      * 
      * @param fields (e.g. ["4500", "0028", "1c46"])
      * @return string of fields (e.g. 450000281c46)
@@ -213,6 +213,8 @@ public class PacketSender {
      */
     public static void main(String[] args) throws Exception {
 
+        // ****************** VERIFY USER INPUT ****************** //
+
         // verify that command line arguments are inputted correctly
         if (!verifyArgs(args)) {
             throw new Exception(
@@ -223,30 +225,42 @@ public class PacketSender {
                             "\n\n\tjava PacketSender.java 127.0.0.1 \"Columbia is the best\"\n");
         }
 
+        // ******** ENCAPSULATE THE PAYLOAD AND CREATE THE PACKET ******** //
+
         String receiverIP = args[0];
         String payload = args[1];
-
-        // try to connect to server / packet receiver
-        // Socket client = new Socket(receiverIP, 8888);
-        // if server is not listening - You will get Exception
-        // java.net.ConnectException: Connection refused: connect
+        String encodedPayload = "";
+        String packet = "";
 
         // encode the payload and create an IPv4 packet to be sent to the server
         System.out.println("Receiver IP: " + receiverIP + "\nPayload: " + payload);
-        System.out.println("\n==== Creating packet by encapsulating the payload into an IPv4 packet... ====\n");
-        System.out.println(encodePayload(payload));
-        System.out.println(encapsulatePayload(encodePayload(payload))); // encode payload from English to hexadecimal,
-                                                                        // then begin payload encapsulation process
+        System.out.println("\n**** Creating packet by encapsulating the payload into an IPv4 packet... ****\n");
 
-        // // write to server using output stream
-        // DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        // out.writeUTF("Hello server - How are you sent by Client");
+        System.out.println("Encoded the payload from plain-text to hexadecimal:");
+        encodedPayload = encodePayload(payload);
+        System.out.println("\t" + encodedPayload);
 
-        // // read from the server
-        // DataInputStream in = new DataInputStream(client.getInputStream());
-        // System.out.println("Data received from the server is -> " + in.readUTF());
+        packet = encapsulatePayload(encodedPayload); // begin payload encapsulation process
+        System.out.println("Packet to be sent to PacketReceiver.java:");
+        System.out.println("\t" + packet);
 
-        // // close the connection
-        // client.close();
+        // ******** SEND THE PACKET TO PACKET RECEIVER ******** //
+
+        // try to connect to server / packet receiver
+        Socket client = new Socket("127.0.0.1", 8888);
+        // if server is not listening - You will get Exception
+        // java.net.ConnectException: Connection refused: connect
+
+        // write to server using output stream
+        System.out.println("Sending data...");
+        DataOutputStream out = new DataOutputStream(client.getOutputStream());
+        out.writeUTF("050000281c46400040069d35C0A80003C0A80001434f4c4f4d4249412032202d204d4553534FFFFF");
+
+        // read from the server
+        DataInputStream in = new DataInputStream(client.getInputStream());
+        System.out.println("Response received from the server ====> " + in.readUTF());
+
+        // close the connection
+        client.close();
     }
 }
