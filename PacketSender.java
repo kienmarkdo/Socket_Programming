@@ -254,7 +254,7 @@ public class PacketSender {
         // write to server using output stream
         System.out.println("Sending data...");
         DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        out.writeUTF("050000281c46400040069d35C0A80003C0A80001434f4c4f4d4249412032202d204d4553534FFFFF");
+        out.writeUTF(packet);
 
         // read from the server
         DataInputStream in = new DataInputStream(client.getInputStream());
