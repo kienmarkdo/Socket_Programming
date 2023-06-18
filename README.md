@@ -1,6 +1,6 @@
 # Network Socket Programming
 
-This program simulates two machines communcating with each other (client-server communication) by sending IPv4 packets via a socket. On the client, the user starts by entering the IP address of the receiver and the message they wish to send to the receiver (the payload). 
+This program simulates two machines communicating with each other (client-server communication) by sending IPv4 packets via a socket. On the client, the user starts by entering the IP address of the receiver and the message they wish to send to the receiver (the payload). 
 
 The sender (client) then takes that information and performs the following operations:
 - Encodes the payload from plain-text into hexadecimal
