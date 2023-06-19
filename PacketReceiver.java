@@ -4,6 +4,30 @@ import java.io.*;
 public class PacketReceiver extends Thread {
 
     /**
+     * Converts a hexadecimal string IPv4 address to a regular string IPv4 address
+     * 
+     * @param hexIpAddress (e.g. 0A064156)
+     * @return IPv4 address string (e.g.: 10.6.65.86)
+     */
+    static String convertHexadecimalToIPv4String(String hexIpAddress) {
+
+        String ip = "";
+
+        // splits the hex IP address into groups of 2 and then convert them to integers
+        // 0A = 10 -- 06 = 06 -- 41 = 65 -- 56 = 86
+        for (int i = 0; i < hexIpAddress.length(); i = i + 2) {
+            ip = ip + Integer.valueOf(hexIpAddress.substring(i, i + 2), 16);
+
+            // do not add a period if this is the last octet in the IPv4 address
+            if (i != hexIpAddress.length() - 2) {
+                ip += ".";
+            }
+        }
+
+        return ip;
+    }
+
+    /**
      * Converts a singular packet string into a string array of 2-byte packet fields
      * 
      * @param packet (e.g. 450000281c46)
@@ -104,20 +128,44 @@ public class PacketReceiver extends Thread {
         }
     }
 
-    static String decodePacket(String encodedPacket) {
+    /**
+     * Extracts the decoded payload from an encoded IPv4 packet
+     * 
+     * @param encodedPacket "450000281c46400040069d35C0A80003C0A80001434f4c4f4d4249412032202d204d455353492030"
+     * @return payload in plain-text e.g. "COLOMBIA 2 - MESSI 0"
+     */
+    static String decodePayload(String encodedPacket) {
         String message = "";
         if (!verifyEncodedPacket(encodedPacket)) {
             message = "ERROR: This packet has been corrupted.";
         } else {
-            String encodedPayload = encodedPacket.substring(40); // extract the payload from the encoded packet
+            String encodedPayload = encodedPacket.substring(40); // extract the payload portion from the encoded packet
             message = convertHexadecimalToString(encodedPayload);
         }
 
         return message;
     }
 
+    /**
+     * Extracts the decoded source IP from an encoded IPv4 packet
+     * 
+     * @param encodedPacket "450000281c46400040069d35C0A80003C0A80001434f4c4f4d4249412032202d204d455353492030"
+     * @return source IP in plain-text e.g. 192.168.0.3
+     */
+    static String decodeSourceIP(String encodedPacket) {
+        String message = "";
+        if (!verifyEncodedPacket(encodedPacket)) {
+            message = "ERROR: This packet has been corrupted.";
+        } else {
+            String encodedSourceIP = encodedPacket.substring(24, 32); // extract the source IP from the encoded packet
+            message = convertHexadecimalToIPv4String(encodedSourceIP);
+        }
+
+        return message;
+    }
+
     public static void main(String[] args) throws Exception {
-        System.out.println("Packet Receiver Listening on port 8888");
+        System.out.println("Packet Receiver Listening on port 8888\n");
         ServerSocket serverSocket = new ServerSocket(8888);
         // server timeout 60 minutes
         serverSocket.setSoTimeout(1000 * 60 * 60);
@@ -128,11 +176,13 @@ public class PacketReceiver extends Thread {
         // Read from client using input stream
         DataInputStream in = new DataInputStream(server.getInputStream());
         String receivedPacket = in.readUTF();
-        System.out.println("Packet received successfully!");
-        System.out.println(receivedPacket);
+        String sourceIP = decodeSourceIP(receivedPacket); // gets the decoded source IP from the raw encoded packet
 
-        // Decode packet (de-encapsulate) and print the message to terminal
-        String message = decodePacket(receivedPacket);
+        System.out.println("Successfully received packet from: " + sourceIP);
+        System.out.println("Raw packet data: " + receivedPacket + "\n");
+
+        // Decode packet (de-encapsulate) and print the payload/message to terminal
+        String message = decodePayload(receivedPacket);
         System.out.println("Message: " + message);
 
         // Write to client using output stream
