@@ -183,13 +183,26 @@ public class PacketReceiver extends Thread {
 
         // Decode packet (de-encapsulate) and print the payload/message to terminal
         String message = decodePayload(receivedPacket);
-        System.out.println("Message: " + message);
+        System.out.println("Message: " + message + "\n");
+
+        // display other logistical information regarding the packet
+        int headerLength = 40;
+        int payloadLength = receivedPacket.length() - headerLength;
+
+        int numOfBits = payloadLength * 4;
+        int numOfBytes = payloadLength / 2;
+        int packetLength = receivedPacket.length() / 2;
+
+        System.out.println("The data has " + numOfBits + " bits or " + numOfBytes + " bytes.");
+        System.out.println("The total length of the packet is " + packetLength + " bytes.");
 
         // Write to client using output stream
         DataOutputStream out = new DataOutputStream(server.getOutputStream());
         if (verifyEncodedPacket(receivedPacket)) {
+            System.out.println("Checksum verification confirms that the received packet is authentic.");
             out.writeUTF("I received your message succesfully! Goodbye!");
         } else {
+            System.out.println("Checksum verification shows that the received packet is corrupted. Packet discarded!");
             out.writeUTF(
                     "Oh no, the packet I received was corrupted. Send me your message again when we talk next time!");
         }
