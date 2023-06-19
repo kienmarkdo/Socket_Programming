@@ -45,6 +45,26 @@ public class PacketSender {
     }
 
     /**
+     * Converts a singular packet string into a string array of 2-byte packet fields
+     * 
+     * @param packet (e.g. 450000281c46)
+     * @return string array of fields (e.g. ["4500", "0028", "1c46"])
+     */
+    static String[] convertStringToFields(String packet) {
+
+        // create an array to store the substrings
+        String[] fields = new String[packet.length() / 4];
+
+        // iterate over the input string and extract substrings of length 4
+        for (int i = 0; i < packet.length(); i += 4) {
+            fields[i / 4] = packet.substring(i, i + 4);
+        }
+
+        return fields;
+
+    }
+
+    /**
      * Calculate the total hexadecimal length of a string packet
      * 
      * @param packet (e.g.
@@ -75,12 +95,7 @@ public class PacketSender {
         packet = packet.substring(0, 40);
 
         // create an array to store the substrings
-        String[] hexNums = new String[packet.length() / 4];
-
-        // iterate over the input string and extract substrings of length 4
-        for (int i = 0; i < packet.length(); i += 4) {
-            hexNums[i / 4] = packet.substring(i, i + 4);
-        }
+        String[] hexNums = convertStringToFields(packet); // iterate and extract substrings of length 4 from packet
 
         // STEP 2: Calculate the header checksum
 

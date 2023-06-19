@@ -19,10 +19,6 @@ public class PacketReceiver extends Thread {
             fields[i / 4] = packet.substring(i, i + 4);
         }
 
-        for (String field : fields) {
-            System.out.println("FIELD: " + field);
-        }
-
         return fields;
 
     }
@@ -46,12 +42,7 @@ public class PacketReceiver extends Thread {
         packet = packet.substring(0, 40);
 
         // create an array to store the substrings
-        String[] hexNums = new String[packet.length() / 4];
-
-        // iterate over the input string and extract substrings of length 4
-        for (int i = 0; i < packet.length(); i += 4) {
-            hexNums[i / 4] = packet.substring(i, i + 4);
-        }
+        String[] hexNums = convertStringToFields(packet); // iterate and extract substrings of length 4 from packet
 
         // STEP 2: Calculate the header checksum
 
