@@ -52,6 +52,8 @@ public class PacketSender {
      * @return the length of the string packet formatted with 4 digits (e.g. 0028)
      */
     static String calculatePacketLength(String packet) {
+        System.out.println("PACKET: " + packet);
+        System.out.println("LENGTH: " + String.format("%04X", packet.length() / 2));
         return String.format("%04X", packet.length() / 2);
     }
 
@@ -150,7 +152,7 @@ public class PacketSender {
      * @param byteData
      * @return packet (encapsulated data)
      */
-    static String encapsulatePayload(String byteData) {
+    static String encapsulatePayload(String byteData, String sourceIP, String destinationIP) {
         // [FIX] All fields marked with FIX (fixed) is to be hard-coded
         // [VAR] All fields marked with VAR (variable) is to be variable data
         // NOTE: One field consists of 2 bytes; one byte consists of 2 hex numbers
@@ -163,16 +165,19 @@ public class PacketSender {
         fields[3] = "4000"; // [FIX] 40 = flag; 00 == fragment offset
         fields[4] = "4006"; // [FIX] 40 == TTL; 06 == TCP protocol
         fields[5] = "0000"; // [VAR] source header checksum (init. to 0000)
-        fields[6] = convertIPv4StringToHexadecimal("192.168.0.3") // [VAR] IP address source (4 bytes);
-                + convertIPv4StringToHexadecimal("192.168.0.1"); // IP address destination (4 bytes)
+        fields[6] = convertIPv4StringToHexadecimal(sourceIP) // [VAR] IP address source (4 bytes);
+                + convertIPv4StringToHexadecimal(destinationIP); // IP address destination (4 bytes)
         fields[7] = byteData; // [VAR] Payload (Has variable byte length too!!!)
         fields[8] = ""; // padding
 
         String packet = "";
         packet = convertFieldsToString(fields);
         fields[8] = addPadding(packet); // add padding such that the packet length is divisible by 8
+        packet = convertFieldsToString(fields); // update packet with updated fields
+
         fields[1] = calculatePacketLength(packet); // calculate packet length field
         packet = convertFieldsToString(fields); // update packet with updated fields
+
         fields[5] = calculateHeaderChecksum(packet); // calculate header checksum field
         packet = convertFieldsToString(fields); // update packet with updated fields
 
@@ -194,6 +199,26 @@ public class PacketSender {
         boolean isIPv4 = matcher.matches();
 
         return args.length == 2 && isIPv4 && args[1] != null;
+    }
+
+    /**
+     * Helper method that only takes text after a forward slash, if the forward
+     * slash is present in the string.
+     * This program was needed because InetAddress.getLocalHost().toString() did not
+     * return consistent results from machine to machine.
+     * For instance, it could return "123.13.1.45" on one machine, and
+     * "Kien/123.13.1.45" on another machine. We only want to extract the IP
+     * address.
+     * 
+     * @param input ip address string that may contain a forward slash (/)
+     * @return ip address string that does not contain a forward slash (/)
+     */
+    static String getTextAfterForwardSlash(String input) {
+        int slashIndex = input.lastIndexOf('/');
+        if (slashIndex != -1 && slashIndex < input.length() - 1) {
+            return input.substring(slashIndex + 1);
+        }
+        return input;
     }
 
     /**
@@ -227,20 +252,21 @@ public class PacketSender {
 
         // ******** ENCAPSULATE THE PAYLOAD AND CREATE THE PACKET ******** //
 
-        String receiverIP = args[0];
+        String sourceIP = getTextAfterForwardSlash(InetAddress.getLocalHost().toString());
+        String destinationIP = args[0];
         String payload = args[1];
         String encodedPayload = "";
         String packet = "";
 
         // encode the payload and create an IPv4 packet to be sent to the server
-        System.out.println("Receiver IP: " + receiverIP + "\nPayload: " + payload);
+        System.out.println("Source IP: " + sourceIP + "\nReceiver IP: " + destinationIP + "\nPayload: " + payload);
         System.out.println("\n**** Creating packet by encapsulating the payload into an IPv4 packet... ****\n");
 
         System.out.println("Encoded the payload from plain-text to hexadecimal:");
         encodedPayload = encodePayload(payload);
         System.out.println("\t" + encodedPayload);
 
-        packet = encapsulatePayload(encodedPayload); // begin payload encapsulation process
+        packet = encapsulatePayload(encodedPayload, sourceIP, destinationIP); // begin payload encapsulation process
         System.out.println("Packet to be sent to PacketReceiver.java:");
         System.out.println("\t" + packet);
 
