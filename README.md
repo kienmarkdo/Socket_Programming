@@ -17,7 +17,7 @@ The receiver (server), while waiting for a packet from the sender:
 
 #### Demo
 
-![image](https://github.com/kienmarkdo/Socket_Programming/assets/67518620/27e82fdc-b9fa-4feb-8ba5-34c244c79518)
+![image](https://github.com/kienmarkdo/Socket_Programming/assets/67518620/b4c53252-f208-47a2-8c92-7d22158a01a1)
 
 _NOTE: All demo images contain dummy IP addresses._
 
@@ -52,7 +52,7 @@ out.writeUTF("050000281c46400040069D35C0A80003C0A80001434f4c4f4d4249412032202d20
 ```
 #### Demo
 
-![image](https://github.com/kienmarkdo/Socket_Programming/assets/67518620/b89dafb6-4bcb-4bd5-a8bf-15f7fc08e2f5)
+![image](https://github.com/kienmarkdo/Socket_Programming/assets/67518620/96dd3cd9-0c3e-4fd2-96c2-eab96ba7057a)
 
 _NOTE: All demo images contain dummy IP addresses._
 
