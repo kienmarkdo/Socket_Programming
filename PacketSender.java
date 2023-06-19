@@ -180,8 +180,8 @@ public class PacketSender {
         fields[3] = "4000"; // [FIX] 40 = flag; 00 == fragment offset
         fields[4] = "4006"; // [FIX] 40 == TTL; 06 == TCP protocol
         fields[5] = "0000"; // [VAR] source header checksum (init. to 0000)
-        fields[6] = convertIPv4StringToHexadecimal(sourceIP) // [VAR] IP address source (4 bytes);
-                + convertIPv4StringToHexadecimal(destinationIP); // IP address destination (4 bytes)
+        fields[6] = convertIPv4StringToHexadecimal("192.168.0.3") // [VAR] IP address source (4 bytes);
+                + convertIPv4StringToHexadecimal("192.168.0.1"); // IP address destination (4 bytes)
         fields[7] = byteData; // [VAR] Payload (Has variable byte length too!!!)
         fields[8] = ""; // padding
 
