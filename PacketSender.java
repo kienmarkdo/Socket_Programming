@@ -52,8 +52,8 @@ public class PacketSender {
      * @return the length of the string packet formatted with 4 digits (e.g. 0028)
      */
     static String calculatePacketLength(String packet) {
-        System.out.println("PACKET: " + packet);
-        System.out.println("LENGTH: " + String.format("%04X", packet.length() / 2));
+        // System.out.println("PACKET: " + packet);
+        // System.out.println("LENGTH: " + String.format("%04X", packet.length() / 2));
         return String.format("%04X", packet.length() / 2);
     }
 
