@@ -19,6 +19,8 @@ The receiver (server), while waiting for a packet from the sender:
 
 ![image](https://github.com/kienmarkdo/Socket_Programming/assets/67518620/4c861bbf-af6b-4b01-a9cf-ab5411b424eb)
 
+_NOTE: All demo images contain dummy IP addresses._
+
 
 ## Instructions
 - Open two terminals in root of project (VSCode is preferred)
@@ -52,6 +54,8 @@ out.writeUTF("050000281c46400040069D35C0A80003C0A80001434f4c4f4d4249412032202d20
 #### Demo
 
 ![image](https://github.com/kienmarkdo/Socket_Programming/assets/67518620/34a3c4fd-0be0-440e-a5a5-2833c2357196)
+
+_NOTE: All demo images contain dummy IP addresses._
 
 
 
