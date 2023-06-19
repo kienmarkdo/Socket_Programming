@@ -33,8 +33,8 @@ _NOTE: All demo images contain dummy IP addresses._
 How to test the program by simulating a corrupt packet scenario? Since it is highly unlikely that a packet will be corrupt during transmission in this simple program, you need to send a corrupt packet manually.
 
 Consider the following correct scenario:
- - Input: `java PacketSender 192.168.0.3 "COLOMBIA 2 - MESSI 0"`
- - Packet: `450000281c46400040069D35C0A80003C0A80001434f4c4f4d4249412032202d204d455353492030`
+ - Input: `java PacketSender 192.168.0.1 "Welcome to Kien's GitHub!"`
+ - Packet: `450000301c46400040069d2dC0A80003C0A8000157656c636f6d6520746f204b69656e27732047697448756221000000`
 ```java
 // ==> In PacketSender.java
 // write to server using output stream
@@ -48,7 +48,7 @@ To simulate sending corrupt data, rather than sending the variable `packet` in `
 // write to server using output stream
 System.out.println("Sending data...");
 DataOutputStream out = new DataOutputStream(client.getOutputStream());
-out.writeUTF("050000281c46400040069D35C0A80003C0A80001434f4c4f4d4249412032202d204d455353492030"); // notice that the first digit is changed from "4" to "0"
+out.writeUTF("050000301c46400040069d2dC0A80003C0A8000157656c636f6d6520746f204b69656e27732047697448756221000000"); // notice that the first digit is changed from "4" to "0"
 ```
 #### Demo
 
